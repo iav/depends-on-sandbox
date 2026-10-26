@@ -1,0 +1,26 @@
+name: "Pull request dependencies"
+
+on:
+  # The pull request's own code is never checked out: only its body and labels are read.
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened, labeled, unlabeled, closed]
+  # Dependencies in other repositories change without an event here.
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+permissions:
+  statuses: write
+  pull-requests: write
+  issues: read
+  contents: read
+
+concurrency:
+  group: depends-on-${{ github.event.pull_request.number || 'all' }}
+  cancel-in-progress: false
+
+jobs:
+  depends-on:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: iav/actions/depends-on@depends-on
