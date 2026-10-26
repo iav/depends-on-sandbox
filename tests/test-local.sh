@@ -3,7 +3,7 @@
 set -euo pipefail
 DEPENDS_ON_REPOSITORY="armbian/build"
 # shellcheck source=/dev/null
-source "$(dirname "$0")/depends-on/depends-on.sh"
+source "${DEPENDS_ON_SCRIPT:-${HOME}/armbian-actions/depends-on/depends-on.sh}"
 
 echo "== parse"
 parse_dependencies <<'EOF'
