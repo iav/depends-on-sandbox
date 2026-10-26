@@ -9,18 +9,37 @@ on:
     - cron: "*/30 * * * *"
   workflow_dispatch:
 
-permissions:
-  statuses: write
-  pull-requests: write
-  issues: read
-  contents: read
+permissions: {}
 
 concurrency:
   group: depends-on-${{ github.event.pull_request.number || 'all' }}
   cancel-in-progress: false
 
 jobs:
-  depends-on:
+  # Reads the pull request bodies and reaches out to the dependencies, with a read-only token.
+  evaluate:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+    outputs:
+      result: ${{ steps.evaluate.outputs.result }}
+    steps:
+      - id: evaluate
+        uses: iav/actions/depends-on@depends-on
+        with:
+          mode: evaluate
+
+  # Writes statuses and comments from the decisions, without reading any body.
+  apply:
+    needs: evaluate
+    runs-on: ubuntu-latest
+    permissions:
+      statuses: write
+      pull-requests: write
     steps:
       - uses: iav/actions/depends-on@depends-on
+        with:
+          mode: apply
+          result: ${{ needs.evaluate.outputs.result }}
