@@ -45,4 +45,8 @@ git https://github.com/armbian/build.git v26.8.1 in main
 git --upload-pack=touch${IFS}/tmp/pwned v1
 git https://example.com/x -v
 git ext::sh v1
+git https://git.example.org/foo.git v1
 EOF
+
+echo "== host requests"
+printf '%s\n' "${host_requests[@]}"
