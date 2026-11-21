@@ -6,7 +6,8 @@ DEPENDS_ON_REPOSITORY="armbian/build"
 source "${DEPENDS_ON_SCRIPT:-${HOME}/armbian-actions/depends-on/depends-on.sh}"
 
 echo "== parse"
-parse_dependencies <<'EOF'
+body="$(
+	cat << 'EOF'
 Some text
 Depends-on: #11108
   depends-on: armbian/configng#1067 released
@@ -15,11 +16,16 @@ Depends-on: #1 inside a fence
 ```
 > Depends-on: #2 quoted
 Depends-on: git https://github.com/torvalds/linux.git v7.3
+Notify-when: git https://github.com/torvalds/linux.git contains "genirq/kexec" in master after v7.3
 EOF
+)"
+parse_lines depends-on <<< "${body}"
+echo "-- notify-when"
+parse_lines notify-when <<< "${body}"
 
 echo "== check"
 while IFS= read -r dep; do
-	check_dependency "${dep}"
+	check_condition "${dep}"
 	printf '%-75s -> %s: %s\n' "${dep}" "${dep_state}" "${dep_reason}"
 done <<'EOF'
 #11108
@@ -39,4 +45,8 @@ git https://github.com/armbian/build.git v26.8.1 in main
 git --upload-pack=touch${IFS}/tmp/pwned v1
 git https://example.com/x -v
 git ext::sh v1
+git https://git.example.org/foo.git v1
 EOF
+
+echo "== host requests"
+printf '%s\n' "${host_requests[@]}"
