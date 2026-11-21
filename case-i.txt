@@ -1,0 +1,1 @@
+case I: armbian:kernel
